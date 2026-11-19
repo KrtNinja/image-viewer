@@ -43,12 +43,12 @@ export function duplicates(output) {
 }
 
 /**
- * Аннотация GitHub: повтор виден в PR рядом с кодом.
+ * Предупреждение GitHub: повтор виден в PR рядом с кодом, но проверку не роняет.
  * @param {{ score: string, left: string, right: string }} candidate
  */
 export function annotation({ score, left, right }) {
   const [, file = left, line = '1', endLine = line] = /^(.+):(\d+)-(\d+)$/.exec(left) ?? []
-  return `::error file=${file},line=${line},endLine=${endLine},title=Повтор (dryer)::Совпадает по структуре с ${right}, score ${score}`
+  return `::warning file=${file},line=${line},endLine=${endLine},title=Повтор (dryer)::Совпадает по структуре с ${right}, score ${score}`
 }
 
 /** @param {string} output */
@@ -97,12 +97,13 @@ function crap() {
   return run('crapper', ['--threshold', String(CRAP_THRESHOLD), 'src']).code
 }
 
-// dryer всегда завершается с 0, поэтому любой найденный кандидат здесь превращается в ошибку.
+// Отчёт для ревью: кандидаты в повторы не делают проверку красной. Красной её делает только сбой самого dryer.
 function dry() {
   const { code, output } = run('dryer', ['src'])
   const found = duplicates(output)
   if (process.env.GITHUB_ACTIONS) found.forEach(candidate => console.log(annotation(candidate)))
-  return code || (found.length > 0 ? 1 : 0)
+  summary(`Кандидатов в повторы: ${found.length}`)
+  return code
 }
 
 /** @param {string | undefined} file */

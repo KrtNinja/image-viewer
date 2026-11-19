@@ -47,7 +47,7 @@ test('кандидаты в повторы читаются из отчёта dr
 test('повтор отмечается в PR на первом месте пары', () => {
   assert.equal(
     annotation({ score: '1.00', left: 'src/swipe.ts:6-9', right: 'src/wheel.ts:26-29' }),
-    '::error file=src/swipe.ts,line=6,endLine=9,title=Повтор (dryer)::Совпадает по структуре с src/wheel.ts:26-29, score 1.00',
+    '::warning file=src/swipe.ts,line=6,endLine=9,title=Повтор (dryer)::Совпадает по структуре с src/wheel.ts:26-29, score 1.00',
   )
 })
 
