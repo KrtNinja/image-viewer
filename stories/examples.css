@@ -7,14 +7,15 @@
 body.sb-show-main {
   box-sizing: border-box;
   margin: 0;
-  padding: clamp(12px, 3vw, 40px);
   background: #171a20;
   color: #f5f3ee;
   font: 1rem/1.5 system-ui, sans-serif;
 }
+#storybook-root { padding: clamp(12px, 3vw, 40px); }
 .example-frame {
+  margin-inline: auto;
   inline-size: min(100%, 880px);
-  block-size: min(70vh, 570px);
+  block-size: min(80dvh, 640px);
 }
 .example-frame--narrow { inline-size: min(100%, 360px); }
 .example-pair {

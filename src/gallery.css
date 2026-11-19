@@ -55,6 +55,7 @@
 .gallery-viewer__strip {
   display: flex;
   flex: none;
+  justify-content: safe center;
   gap: var(--gallery-gap, .5rem);
   overflow-x: auto;
   scrollbar-width: none;

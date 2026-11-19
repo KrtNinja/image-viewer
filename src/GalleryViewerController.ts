@@ -4,17 +4,21 @@ import type { ImageBase } from './ImageBase.js'
 type Stroke = { id: number; x: number; y: number; moved: boolean }
 
 export class GalleryViewerController {
+  private ids: string[] = []
   private lastStartId?: string
 
   constructor(readonly service: GalleryViewerService) {}
 
   update(images: ImageBase[], startId?: string) {
-    const previous = this.service.images
-    const sameOrder = previous.length === images.length &&
-      previous.every((image, index) => image.id === images[index].id)
+    const sameOrder = this.ids.length === images.length &&
+      this.ids.every((id, index) => id === images[index].id)
 
-    if (sameOrder) this.service.images = images.slice()
-    else this.service.setImages(images)
+    if (sameOrder) {
+      this.service.images = images.slice()
+    } else {
+      this.service.setImages(images)
+      this.ids = images.map(image => image.id)
+    }
 
     if (images.length) {
       if (startId !== undefined && startId !== this.lastStartId) this.service.select(startId)
