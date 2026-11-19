@@ -1,25 +1,25 @@
 import { ownStripSelector, selectedThumbnailSelector } from './Gallery.dom.js'
+import { mutationsAffectContainer, scrollLeftToReveal } from './reveal.js'
+
+function reveal(root: HTMLElement) {
+  const row = root.querySelector<HTMLElement>(ownStripSelector)
+  if (!row) return
+  const button = row.querySelector<HTMLButtonElement>(selectedThumbnailSelector)
+  if (!button) return
+  row.scrollLeft = scrollLeftToReveal(button.offsetLeft, button.offsetWidth, row.scrollLeft, row.clientWidth)
+}
+
+function revealAfterMutation(root: HTMLElement, records: MutationRecord[]) {
+  const row = root.querySelector(ownStripSelector)
+  if (row && mutationsAffectContainer(records, root, row)) reveal(root)
+}
 
 export function mount(root: HTMLElement): () => void {
-  function reveal() {
-    const row = root.querySelector<HTMLElement>(ownStripSelector)
-    const button = row?.querySelector<HTMLButtonElement>(selectedThumbnailSelector)
-    if (!row || !button) return
-    const left = button.offsetLeft
-    const right = left + button.offsetWidth
-    if (left < row.scrollLeft) row.scrollLeft = left
-    else if (right > row.scrollLeft + row.clientWidth) row.scrollLeft = right - row.clientWidth
-  }
-
-  const resize = new ResizeObserver(reveal)
+  const resize = new ResizeObserver(reveal.bind(null, root))
   resize.observe(root)
-  const mutations = new MutationObserver(records => {
-    const row = root.querySelector(ownStripSelector)
-    if (row && records.some(({ target, type }) => target === root || target === row ||
-      (type === 'attributes' && target.parentElement === row))) reveal()
-  })
+  const mutations = new MutationObserver(revealAfterMutation.bind(null, root))
   mutations.observe(root, { subtree: true, childList: true, attributeFilter: ['aria-pressed'] })
-  reveal()
+  reveal(root)
   return () => {
     resize.disconnect()
     mutations.disconnect()
