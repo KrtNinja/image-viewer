@@ -1,30 +1,9 @@
-import type { GalleryViewerService } from './GalleryViewerService.js'
-import type { ImageBase } from './ImageBase.js'
+import type { GalleryService } from './Gallery.service.js'
 
 type Stroke = { id: number; x: number; y: number; moved: boolean }
 
 export class GalleryViewerController {
-  private ids: string[] = []
-  private lastStartId?: string
-
-  constructor(readonly service: GalleryViewerService) {}
-
-  update(images: ImageBase[], startId?: string) {
-    const sameOrder = this.ids.length === images.length &&
-      this.ids.every((id, index) => id === images[index].id)
-
-    if (sameOrder) {
-      this.service.images = images.slice()
-    } else {
-      this.service.setImages(images)
-      this.ids = images.map(image => image.id)
-    }
-
-    if (images.length) {
-      if (startId !== undefined && startId !== this.lastStartId) this.service.select(startId)
-      this.lastStartId = startId
-    }
-  }
+  constructor(readonly service: GalleryService) {}
 
   listen(frame: HTMLElement, strip: HTMLElement | null) {
     const service = this.service
@@ -106,8 +85,7 @@ export class GalleryViewerController {
 
     frame.addEventListener('pointerdown', event => {
       const touch = event.pointerType !== 'mouse'
-      if (touch && !service.touchInput) service.descriptionOpen = false
-      service.touchInput = touch
+      service.setTouchInput(touch)
       if (!event.isPrimary || event.button !== 0) return
       const target = event.target
       if (target instanceof Element && target.closest('button, a, input, select, textarea, label, summary, [contenteditable], [role="button"], [role="link"]')) return
@@ -116,7 +94,7 @@ export class GalleryViewerController {
     }, { signal })
 
     frame.addEventListener('pointermove', event => {
-      if (event.pointerType === 'mouse' && service.touchInput) service.touchInput = false
+      if (event.pointerType === 'mouse' && service.touchInput) service.setTouchInput(false)
       if (stroke?.id !== event.pointerId) return
       if (Math.hypot(event.clientX - stroke.x, event.clientY - stroke.y) > 8) stroke.moved = true
     }, { signal })

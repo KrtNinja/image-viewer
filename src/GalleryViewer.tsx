@@ -1,7 +1,7 @@
 import { Component, useEffect, useRef, type ReactNode } from 'react'
 import { listen } from 'kr-observable'
 import { GalleryViewerController } from './GalleryViewerController.js'
-import { GalleryViewerService } from './GalleryViewerService.js'
+import { GalleryService } from './Gallery.service.js'
 import type { ImageBase } from './ImageBase.js'
 
 export type GalleryViewerProps = {
@@ -11,16 +11,18 @@ export type GalleryViewerProps = {
 }
 
 export class GalleryViewer extends Component<GalleryViewerProps> {
-  private controller = new GalleryViewerController(new GalleryViewerService())
+  private service: GalleryService
+  private controller: GalleryViewerController
   private unsubscribe?: () => void
 
   constructor(props: GalleryViewerProps) {
     super(props)
-    this.controller.update(props.images, props.startId)
+    this.service = new GalleryService(props.images, props.startId)
+    this.controller = new GalleryViewerController(this.service)
   }
 
   componentDidMount() {
-    this.unsubscribe = listen(this.controller.service, () => this.forceUpdate())
+    this.unsubscribe = listen(this.service, () => this.forceUpdate())
   }
 
   componentWillUnmount() {
@@ -29,23 +31,23 @@ export class GalleryViewer extends Component<GalleryViewerProps> {
 
   componentDidUpdate(previous: GalleryViewerProps) {
     // A parent may reuse the same array after editing an ImageBase.
-    if (previous !== this.props) this.controller.update(this.props.images, this.props.startId)
+    if (previous !== this.props) this.service.sync(this.props.images, this.props.startId)
   }
 
   render() {
-    return <GalleryView controller={this.controller}>{this.props.children}</GalleryView>
+    return <GalleryView controller={this.controller} service={this.service}>{this.props.children}</GalleryView>
   }
 }
 
-function GalleryView({ controller, children }: {
+function GalleryView({ controller, service, children }: {
+  service: GalleryService
   controller: GalleryViewerController
   children?: ReactNode
 }) {
   const frame = useRef<HTMLDivElement>(null)
   const strip = useRef<HTMLDivElement>(null)
   const selected = useRef<HTMLButtonElement>(null)
-  const service = controller.service
-  const image = service.images[service.index]
+  const image = service.currentImage
   const hasPhoto = Boolean(image)
   const hasStrip = service.images.length > 1
 
