@@ -91,9 +91,7 @@ export class GalleryController {
     if (!photo) return
     const action = swipe.end(event.pointerId, event.clientX, event.clientY)
     if (action === 'tap') {
-      if (event.pointerType !== 'mouse' && photo.querySelector(nonEmptyCaptionSelector)) {
-        this.service.toggleDescription()
-      }
+      if (photo.querySelector(nonEmptyCaptionSelector)) this.service.toggleDescription()
     } else if (action) this.service[action]()
   }
 }
