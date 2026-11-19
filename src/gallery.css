@@ -1,0 +1,88 @@
+.gallery-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gallery-gap, .5rem);
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: 4 / 3;
+  min-inline-size: 0;
+  min-block-size: 0;
+  line-height: 1.5;
+}
+.gallery-viewer__stage {
+  flex: 1 1 0;
+  min-block-size: 0;
+  container-type: size;
+  display: grid;
+  place-items: center;
+}
+.gallery-viewer__frame {
+  position: relative;
+  touch-action: pan-y pinch-zoom;
+}
+.gallery-viewer__photo {
+  display: block;
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: 100cqw;
+  max-block-size: 100cqh;
+  object-fit: contain;
+  user-select: none;
+}
+.gallery-viewer__caption {
+  box-sizing: border-box;
+  position: absolute;
+  inset: auto 0 0;
+  max-block-size: 100%;
+  overflow: auto;
+  padding: .75rem 1rem;
+  background: var(--gallery-caption, rgb(12 15 19 / .88));
+  color: white;
+  opacity: 0;
+  pointer-events: none;
+}
+.gallery-viewer__caption[data-open],
+.gallery-viewer__caption:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: hover) {
+  .gallery-viewer__frame:not([data-touch]):hover > .gallery-viewer__caption {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+.gallery-viewer__strip {
+  display: flex;
+  flex: none;
+  gap: var(--gallery-gap, .5rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.gallery-viewer__strip::-webkit-scrollbar { display: none; }
+.gallery-viewer__strip > button {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  inline-size: min(4.75rem, 100%);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: .4rem;
+  background: transparent;
+  cursor: pointer;
+}
+.gallery-viewer__strip > button[aria-pressed="true"] {
+  border-color: var(--gallery-accent, #3672bc);
+}
+.gallery-viewer__strip img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: .15rem;
+  object-fit: cover;
+}
+.gallery-viewer :focus-visible {
+  outline: 2px solid var(--gallery-focus, #70adff);
+  outline-offset: -2px;
+}

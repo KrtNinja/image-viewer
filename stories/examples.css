@@ -1,0 +1,57 @@
+:root {
+  color-scheme: dark;
+  --gallery-accent: #ffc46d;
+  --gallery-focus: #a5dfff;
+  --gallery-caption: rgb(17 21 28 / .91);
+}
+body.sb-show-main {
+  box-sizing: border-box;
+  margin: 0;
+  padding: clamp(12px, 3vw, 40px);
+  background: #171a20;
+  color: #f5f3ee;
+  font: 1rem/1.5 system-ui, sans-serif;
+}
+.example-frame {
+  inline-size: min(100%, 880px);
+  block-size: min(70vh, 570px);
+}
+.example-frame--narrow { inline-size: min(100%, 360px); }
+.example-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 1.5rem;
+}
+.example-actions, .example-caption {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+}
+.example-actions { margin-block-end: 1rem; }
+.example-caption { justify-content: space-between; }
+:is(.example-actions, .example-caption, .example-dialog form, #storybook-root) > button {
+  padding: .4rem .8rem;
+  border: 1px solid #647084;
+  border-radius: .4rem;
+  background: #242b35;
+  color: #f5f3ee;
+  font: inherit;
+  cursor: pointer;
+}
+.example-source {
+  padding: 1rem 1.5rem;
+  border: 1px solid #647084;
+  border-radius: .5rem;
+}
+.example-source p { margin: 0 0 .5rem; }
+.example-dialog {
+  box-sizing: border-box;
+  inline-size: min(92vw, 920px);
+  max-block-size: 94dvh;
+  padding: .75rem;
+  border: 0;
+  background: transparent;
+}
+.example-dialog::backdrop { background: rgb(0 0 0 / 35%); }
+.example-dialog form { margin-block-end: .5rem; text-align: end; }
