@@ -1,6 +1,6 @@
 import {
-  captionSelector, frameSelector, interactiveSelector, nonEmptyCaptionSelector,
-  ownFrame, ownTarget, ownWheelTarget, thumbnailSelector,
+  captionSelector, frameSelector, interactiveSelector, nextArrowSelector, nonEmptyCaptionSelector,
+  ownFrame, ownTarget, ownWheelTarget, prevArrowSelector, thumbnailSelector,
 } from './Gallery.dom.js'
 import type { GalleryService } from './Gallery.service.js'
 import { mount as mountStrip } from './Gallery.strip.js'
@@ -35,8 +35,11 @@ export class GalleryController {
   }
 
   #click = (event: MouseEvent) => {
-    const button = ownTarget(event)?.closest<HTMLButtonElement>(thumbnailSelector)
-    if (button) this.#service.select(button.dataset.id!)
+    const button = ownTarget(event)?.closest('button')
+    if (!button) return
+    if (button.matches(thumbnailSelector)) this.#service.select(button.dataset.id!)
+    else if (button.matches(prevArrowSelector)) this.#service.prev()
+    else if (button.matches(nextArrowSelector)) this.#service.next()
   }
 
   #arrow = (event: KeyboardEvent) => {

@@ -23,10 +23,10 @@ function Caption({ id }: { id: string }) {
   )
 }
 
-function Example({ narrow = false }: { narrow?: boolean }) {
+function Example({ narrow = false, arrows }: { narrow?: boolean, arrows?: boolean }) {
   return (
     <div className={narrow ? 'example-frame example-frame--narrow' : 'example-frame'}>
-      <GalleryViewer images={photos} startId="b">
+      <GalleryViewer images={photos} startId="b" arrows={arrows}>
         <Caption id="collection" />
       </GalleryViewer>
     </div>
@@ -34,6 +34,7 @@ function Example({ narrow = false }: { narrow?: boolean }) {
 }
 
 export const Default: Story = { name: 'Галерея', render: () => <Example /> }
+export const WithoutArrows: Story = { name: 'Без стрелок', render: () => <Example arrows={false} /> }
 export const Narrow: Story = { name: 'Ширина 360 px', render: () => <Example narrow /> }
 export const TextCaption: Story = {
   name: 'Текстовая подпись',

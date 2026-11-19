@@ -54,7 +54,59 @@ test('пустой список, первое заполнение, повтор
   await page.getByText('Только D').click()
   await expect(photo(page)).toHaveAttribute('alt', 'Большое красное пятно в облаках Юпитера')
   await expect(strip(page)).toHaveCount(0)
+  await expect(page.locator('.gallery-viewer__arrow')).toHaveCount(0)
   await expect(page.locator('.gallery-viewer__caption')).toHaveCount(0)
+})
+
+test('кнопки перелистывают кадры и становятся недоступными на краях', async ({ page }) => {
+  await open(page, 'default')
+  const prev = page.getByRole('button', { name: 'Предыдущее фото' })
+  const next = page.getByRole('button', { name: 'Следующее фото' })
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+  await next.click()
+  await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
+  await prev.click()
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+  await prev.click()
+  await expect(thumb(page, 1)).toHaveAttribute('aria-pressed', 'true')
+  await expect(prev).toBeDisabled()
+  await expect(next).toBeEnabled()
+  await thumb(page, 8).click()
+  await expect(prev).toBeEnabled()
+  await expect(next).toBeDisabled()
+})
+
+test('при arrows={false} галерея показывает ленту без кнопок перелистывания', async ({ page }) => {
+  await open(page, 'without-arrows')
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.gallery-viewer__arrow')).toHaveCount(0)
+})
+
+test('колесо над кнопкой перелистывания выбирает соседний кадр', async ({ page }) => {
+  await open(page, 'narrow')
+  const prev = page.getByRole('button', { name: 'Предыдущее фото' })
+  await prev.hover()
+  await page.mouse.wheel(0, 160)
+  await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
+  await thumb(page, 1).click()
+  await expect(prev).toBeDisabled()
+  await prev.hover()
+  await page.mouse.wheel(0, 160)
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('кнопка перелистывания во вложенной галерее меняет только её кадр', async ({ page }) => {
+  await open(page, 'independent')
+  await page.locator('.example-frame').evaluateAll(([outer, inner]) => {
+    outer.querySelector('.gallery-viewer__caption')!.append(inner)
+  })
+  const outer = page.locator('.example-pair > .example-frame > .gallery-viewer')
+  const inner = outer.locator('.gallery-viewer')
+  const next = inner.getByRole('button', { name: 'Следующее фото' })
+  await next.focus()
+  await next.click()
+  await expect(inner.locator('[aria-pressed=true]')).toHaveAccessibleName('Фото 2')
+  await expect(outer.locator(':scope > .gallery-viewer__strip [aria-pressed=true]')).toHaveAccessibleName('Фото 1')
 })
 
 // Model continuous or separate wheel gestures independently of browser automation latency.
@@ -228,6 +280,15 @@ test.describe('сенсорный ввод', () => {
   test.beforeEach(async ({ page }) => {
     const hoverNone = await page.evaluate(() => matchMedia('(hover: none)').matches)
     expect(hoverNone).toBe(true)
+  })
+
+  test('касание кнопки перелистывает кадр и оставляет описание закрытым', async ({ page }) => {
+    await open(page, 'narrow')
+    const caption = page.locator('.gallery-viewer__caption')
+    await expect(caption).toBeAttached()
+    await page.getByRole('button', { name: 'Следующее фото' }).tap()
+    await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
+    await expect(caption).not.toHaveAttribute('data-open')
   })
 
   test('два тапа в одной точке, кнопка и независимость двух галерей', async ({ page }) => {

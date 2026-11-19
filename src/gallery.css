@@ -11,11 +11,33 @@
 }
 .gallery-viewer[hidden] { display: none; }
 .gallery-viewer__stage {
+  position: relative;
   flex: 1 1 0;
   min-block-size: 0;
   container-type: size;
   display: grid;
   place-items: center;
+}
+.gallery-viewer__arrow {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--gallery-arrow, rgb(12 15 19 / .65));
+  color: var(--gallery-arrow-color, white);
+  cursor: pointer;
+}
+.gallery-viewer__arrow--prev { left: .5rem; }
+.gallery-viewer__arrow--next { right: .5rem; }
+.gallery-viewer__arrow:disabled {
+  opacity: .4;
+  cursor: default;
 }
 .gallery-viewer__frame {
   position: relative;

@@ -7,10 +7,24 @@ import type { ImageBase } from './ImageBase.js'
 export type GalleryViewerProps = {
   images: ImageBase[]
   startId?: string
+  arrows?: boolean
   children?: ReactNode
 }
 
-export const GalleryViewer = observer(function GalleryViewer({ images, startId, children }: GalleryViewerProps) {
+function Arrow({ direction, disabled }: { direction: 'prev' | 'next', disabled: boolean }) {
+  const previous = direction === 'prev'
+  return (
+    <button type="button" className={`gallery-viewer__arrow gallery-viewer__arrow--${direction}`}
+      aria-label={previous ? 'Предыдущее фото' : 'Следующее фото'} disabled={disabled} tabIndex={-1}>
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d={previous ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} />
+      </svg>
+    </button>
+  )
+}
+
+export const GalleryViewer = observer(function GalleryViewer({ images, startId, arrows = true, children }: GalleryViewerProps) {
   const [{ service, controller }] = useState(() => {
     const service = new GalleryService(images, startId)
     return { service, controller: new GalleryController(service) }
@@ -20,6 +34,7 @@ export const GalleryViewer = observer(function GalleryViewer({ images, startId, 
   useEffect(() => service.sync(images, startId), [service, images, startId])
 
   const image = service.currentImage
+  const multipleImages = service.images.length > 1
   const hasDescription = children != null && typeof children !== 'boolean'
   return (
     <div className="gallery-viewer" ref={root} hidden={!image}>
@@ -34,9 +49,15 @@ export const GalleryViewer = observer(function GalleryViewer({ images, startId, 
               </div>
             )}
           </div>
+          {arrows && multipleImages && (
+            <>
+              <Arrow direction="prev" disabled={!service.canPrev} />
+              <Arrow direction="next" disabled={!service.canNext} />
+            </>
+          )}
         </div>
       )}
-      {service.images.length > 1 && (
+      {multipleImages && (
         <div className="gallery-viewer__strip" role="group" aria-label="Миниатюры">
           {service.images.map((item, index) => (
             <button className="gallery-viewer__thumb" type="button" key={item.id} data-id={item.id}
