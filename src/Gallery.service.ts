@@ -9,8 +9,8 @@ export class GalleryService extends Observable {
   index = -1
   descriptionOpen = false
 
-  private ids: string[] = []
-  private lastStartId?: string
+  #ids: string[] = []
+  #lastStartId?: string
 
   constructor(images: ImageBase[], startId?: string) {
     super()
@@ -22,17 +22,17 @@ export class GalleryService extends Observable {
   }
 
   sync(images: ImageBase[], startId?: string) {
-    const sameOrder = this.ids.length === images.length &&
-      this.ids.every((id, i) => id === images[i].id)
+    const sameOrder = this.#ids.length === images.length &&
+      this.#ids.every((id, i) => id === images[i].id)
 
     this.images = images.slice()
     if (!sameOrder) {
-      this.ids = images.map(image => image.id)
+      this.#ids = images.map(image => image.id)
       this.index = images.length ? 0 : -1
     }
     if (images.length) {
-      if (startId !== undefined && startId !== this.lastStartId) this.select(startId)
-      this.lastStartId = startId
+      if (startId !== undefined && startId !== this.#lastStartId) this.select(startId)
+      this.#lastStartId = startId
     }
   }
 
