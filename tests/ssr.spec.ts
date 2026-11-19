@@ -11,7 +11,9 @@ test('сервер отдаёт выбранный снимок и сохран�
   await page.setContent(renderToString(gallery('unknown')))
   await expect(photo).toHaveAttribute('src', '/a.webp')
   await expect(photo).toHaveAttribute('alt', 'Фото 1 из 3')
-  expect(renderToString(gallery('b', []))).toBe('')
+  await page.setContent(renderToString(gallery('b', [])))
+  await expect(page.locator('.gallery-viewer')).toHaveAttribute('hidden', '')
+  await expect(photo).toHaveCount(0)
 })
 
 test('StrictMode подключает управление к уже показанному сервером кадру', async ({ page }, testInfo) => {

@@ -9,6 +9,7 @@
   min-block-size: 0;
   line-height: 1.5;
 }
+.gallery-viewer[hidden] { display: none; }
 .gallery-viewer__stage {
   flex: 1 1 0;
   min-block-size: 0;

@@ -40,11 +40,13 @@ test('выбор, обновление миниатюры, новый поряд
 
 test('пустой список, первое заполнение, повторное заполнение, одно фото', async ({ page }) => {
   await open(page, 'initially-empty')
-  await expect(page.locator('.gallery-viewer')).toHaveCount(0)
+  await expect(page.locator('.gallery-viewer')).toBeAttached()
+  await expect(page.locator('.gallery-viewer')).toBeHidden()
   await page.getByText('A, B', { exact: true }).click()
   await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
   await page.getByText('Очистить').click()
-  await expect(page.locator('.gallery-viewer')).toHaveCount(0)
+  await expect(page.locator('.gallery-viewer')).toBeAttached()
+  await expect(page.locator('.gallery-viewer')).toBeHidden()
   await page.getByText('C, D', { exact: true }).click()
   await expect(thumb(page, 1)).toHaveAttribute('aria-pressed', 'true')
   await thumb(page, 2).click()
