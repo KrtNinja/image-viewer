@@ -47,6 +47,17 @@ export class GalleryViewerController {
       lastWheel = timeStamp
 
       const forward = deltaY > 0
+      const caption = event.target instanceof Element
+        ? event.target.closest<HTMLElement>('.gallery-viewer__caption')
+        : null
+      if (caption?.parentElement === frame) {
+        const bottom = caption.scrollHeight - caption.clientHeight
+        if (forward ? Math.ceil(caption.scrollTop) < bottom : caption.scrollTop > 0) {
+          distance = 0
+          return
+        }
+      }
+
       const hasNeighbor = forward ? service.index + 1 < service.images.length : service.index > 0
       if (hasNeighbor) event.preventDefault()
       if (locked) return
@@ -74,7 +85,9 @@ export class GalleryViewerController {
     }, { capture: true, signal })
 
     frame.addEventListener('pointerdown', event => {
-      service.touchInput = event.pointerType !== 'mouse'
+      const touch = event.pointerType !== 'mouse'
+      if (touch && !service.touchInput) service.descriptionOpen = false
+      service.touchInput = touch
       if (!event.isPrimary || event.button !== 0) return
       const target = event.target
       if (target instanceof Element && target.closest('button, a, input, select, textarea, label, summary, [contenteditable], [role="button"], [role="link"]')) return

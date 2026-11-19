@@ -41,18 +41,21 @@
   opacity: 0;
   pointer-events: none;
 }
-.gallery-viewer__caption[data-open],
+.gallery-viewer__caption:empty { display: none; }
+.gallery-viewer__frame[data-touch] > .gallery-viewer__caption[data-open],
+.gallery-viewer__frame:focus-visible > .gallery-viewer__caption,
 .gallery-viewer__caption:focus-within {
   opacity: 1;
   pointer-events: auto;
 }
-@media (hover: hover) {
+@media (any-hover: hover) {
   .gallery-viewer__frame:not([data-touch]):hover > .gallery-viewer__caption {
     opacity: 1;
     pointer-events: auto;
   }
 }
 .gallery-viewer__strip {
+  position: relative;
   display: flex;
   flex: none;
   justify-content: safe center;

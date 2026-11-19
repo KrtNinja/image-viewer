@@ -129,7 +129,7 @@ test('портрет и панорама, свободное поле, опис�
   await expect(page.locator('#collection')).toBeVisible()
 })
 
-test('360 px, выбор туда и обратно, ручная прокрутка и изменение ширины', async ({ page }) => {
+test('360 px, ручная прокрутка, выбор и изменение ширины при scale(.5)', async ({ page }) => {
   await open(page, 'narrow')
   const row = strip(page)
   await expect(row).toHaveCSS('width', '360px')
@@ -138,6 +138,7 @@ test('360 px, выбор туда и обратно, ручная прокрут
   await wheel(photo(page), 160, 100)
   await visibleItem(page)
   expect(await row.evaluate(node => node.scrollLeft)).toBe(33)
+  await page.locator('.example-frame').evaluate(node => { node.style.transform = 'scale(.5)' })
   for (let index = 4; index <= 8; index++) {
     await wheel(photo(page), 160, index * 100)
     await expect(thumb(page, index)).toHaveAttribute('aria-pressed', 'true')
@@ -154,6 +155,41 @@ test('360 px, выбор туда и обратно, ручная прокрут
     await visibleItem(page)
   }
   expect(await row.evaluate(node => node.scrollLeft)).toBe(0)
+})
+
+test('Tab показывает текстовую подпись, колесо прокручивает её до края', async ({ page }) => {
+  await open(page, 'text-caption')
+  const frame = page.locator('.gallery-viewer__frame')
+  const caption = page.locator('.gallery-viewer__caption')
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+  await page.mouse.move(1, 1)
+  await page.keyboard.press('Tab')
+  await expect(frame).toBeFocused()
+  await expect(caption).toHaveCSS('opacity', '1')
+  await expect(frame).toHaveCSS('outline-style', 'solid')
+
+  await caption.hover()
+  await page.mouse.wheel(0, 180)
+  await expect.poll(() => caption.evaluate(node => node.scrollTop)).toBeGreaterThan(0)
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+  await page.mouse.wheel(0, -180)
+  await expect.poll(() => caption.evaluate(node => node.scrollTop)).toBe(0)
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+
+  expect(await wheel(caption, 160, 1000)).toBe(false)
+  await caption.evaluate(node => { node.scrollTop = node.scrollHeight })
+  expect(await wheel(caption, 80, 1020)).toBe(true)
+  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
+  await wheel(caption, 80, 1040)
+  await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
+  await caption.evaluate(node => { node.scrollTop = 0 })
+  expect(await wheel(caption, 5, 1060)).toBe(false)
+  expect(await wheel(caption, 5, 1080)).toBe(false)
+  await wheel(photo(page), -160, 1100)
+  await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
+
+  await caption.evaluate(node => node.replaceChildren())
+  await expect(caption).toBeHidden()
 })
 
 test('диалог, положение страницы и диалога, Escape и кнопка закрытия', async ({ page }) => {
@@ -191,6 +227,8 @@ test.describe('сенсорный ввод', () => {
     await first.getByRole('button', { name: 'Фото 2', exact: true }).tap()
     const image = first.locator('.gallery-viewer__photo')
     const caption = first.locator('.gallery-viewer__caption')
+    await expect(image).toHaveAttribute('alt', 'Фото 2 из 4')
+    await image.evaluate(node => (node as HTMLImageElement).decode())
     const bounds = (await image.boundingBox())!
     const tap = () => page.touchscreen.tap(bounds.x + bounds.width / 2, bounds.y + 15)
     await tap()
@@ -200,6 +238,12 @@ test.describe('сенсорный ввод', () => {
     await tap()
     await expect(caption).toHaveCSS('opacity', '0')
     await tap()
+    await image.hover({ position: { x: 8, y: 8 } })
+    await expect(first.locator('.gallery-viewer__frame')).not.toHaveAttribute('data-touch', 'true')
+    await page.mouse.move(1, 1)
+    await expect(caption).toHaveCSS('opacity', '0')
+    await tap()
+    await expect(caption).toHaveCSS('opacity', '1')
     await caption.getByRole('button').tap()
     await expect(first.locator('[popover]')).toBeVisible()
     await expect(first.locator('[aria-pressed=true]')).toHaveAccessibleName('Фото 2')

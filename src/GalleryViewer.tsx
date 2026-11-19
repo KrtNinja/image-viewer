@@ -1,4 +1,4 @@
-import { Children, useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { observer } from 'kr-observable/react'
 import { GalleryViewerController } from './GalleryViewerController.js'
 import { GalleryViewerService } from './GalleryViewerService.js'
@@ -41,11 +41,10 @@ const GalleryView = observer(function GalleryView({ controller, children }: {
     const button = selected.current
     if (!row || !button) return
     const reveal = () => {
-      const bounds = row.getBoundingClientRect()
-      const item = button.getBoundingClientRect()
-      const overflow = item.right - bounds.right
-      if (overflow > 0) row.scrollLeft += overflow
-      else if (item.left < bounds.left) row.scrollLeft += item.left - bounds.left
+      const left = button.offsetLeft
+      const right = left + button.offsetWidth
+      if (left < row.scrollLeft) row.scrollLeft = left
+      else if (right > row.scrollLeft + row.clientWidth) row.scrollLeft = right - row.clientWidth
     }
     reveal()
     const resize = new ResizeObserver(reveal)
@@ -54,13 +53,15 @@ const GalleryView = observer(function GalleryView({ controller, children }: {
   }, [hasStrip, image?.id, service.index])
 
   if (!image) return null
+  const hasDescription = children != null && typeof children !== 'boolean'
   return (
     <div className="gallery-viewer">
       <div className="gallery-viewer__stage">
-        <div className="gallery-viewer__frame" ref={frame} data-touch={service.touchInput || undefined}>
+        <div className="gallery-viewer__frame" ref={frame} tabIndex={hasDescription ? 0 : undefined}
+          data-touch={service.touchInput || undefined}>
           <img className="gallery-viewer__photo" src={image.src} draggable={false}
             alt={`Фото ${service.index + 1} из ${service.images.length}`} />
-          {Children.toArray(children).length > 0 && (
+          {hasDescription && (
             <div className="gallery-viewer__caption" data-open={service.descriptionOpen || undefined}>
               {children}
             </div>

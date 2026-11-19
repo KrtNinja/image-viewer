@@ -1,4 +1,4 @@
-import { Component, useRef } from 'react'
+import { Component } from 'react'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { GalleryViewer, ImageBase } from '../src'
 import { photos } from './photos'
@@ -35,6 +35,24 @@ function Example({ narrow = false }: { narrow?: boolean }) {
 
 export const Default: Story = { name: 'Галерея', render: () => <Example /> }
 export const Narrow: Story = { name: 'Ширина 360 px', render: () => <Example narrow /> }
+export const TextCaption: Story = {
+  name: 'Текстовая подпись',
+  args: {
+    images: photos,
+    startId: 'b',
+    children: 'Землю на первом снимке сфотографировал экипаж «Аполлона-17» по пути к Луне. '
+      + 'На втором виден астронавт над Землёй во время выхода в открытый космос. '
+      + 'Третий снимок показывает кольца Сатурна, а четвёртый — Большое красное пятно Юпитера. '
+      + 'Во второй половине коллекции собраны четыре разных вида: поверхность Луны, '
+      + 'облака газа и пыли в туманности Ориона, Марс и синий диск Нептуна.',
+  },
+  render: args => (
+    <div className="example-frame example-frame--narrow" style={{ maxHeight: 320 }}>
+      <GalleryViewer {...args} />
+    </div>
+  ),
+}
+
 export const Independent: Story = {
   name: 'Две независимые галереи',
   render: () => (
@@ -49,21 +67,20 @@ export const Independent: Story = {
   ),
 }
 
-function DialogExample() {
-  const dialog = useRef<HTMLDialogElement>(null)
-  return (
+export const Dialog: Story = {
+  name: 'В диалоге',
+  render: () => (
     <>
-      <button type="button" onClick={() => dialog.current?.showModal()}>Открыть галерею</button>
-      <dialog className="example-dialog" ref={dialog} aria-label="Просмотр фотографий">
+      <button type="button" {...{ command: 'show-modal', commandfor: 'gallery-dialog' }}>Открыть галерею</button>
+      <dialog className="example-dialog" id="gallery-dialog" aria-label="Просмотр фотографий">
         <form method="dialog"><button autoFocus>Закрыть</button></form>
         <div className="example-frame">
           <GalleryViewer images={photos} startId="h"><Caption id="dialog-source" /></GalleryViewer>
         </div>
       </dialog>
     </>
-  )
+  ),
 }
-export const Dialog: Story = { name: 'В диалоге', render: () => <DialogExample /> }
 
 class UpdatingExample extends Component<{ initialImages?: ImageBase[] }> {
   state = { images: this.props.initialImages ?? photos.slice(0, 3), startId: 'b' }
