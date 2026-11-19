@@ -39,9 +39,9 @@ export const GalleryViewer = observer(function GalleryViewer({ images, startId, 
       {service.images.length > 1 && (
         <div className="gallery-viewer__strip" role="group" aria-label="Миниатюры">
           {service.images.map((item, index) => (
-            <button type="button" key={item.id} data-id={item.id}
+            <button className="gallery-viewer__thumb" type="button" key={item.id} data-id={item.id}
               aria-label={`Фото ${index + 1}`} aria-description={item.alt} aria-pressed={index === service.index}>
-              <img src={item.previewSrc} alt="" draggable={false} />
+              <img className="gallery-viewer__thumb-image" src={item.previewSrc} alt="" draggable={false} />
             </button>
           ))}
         </div>

@@ -84,6 +84,25 @@ test('колесо делит накопление между кадром и л
   await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('стили приложения меняют цвет описания и оформление миниатюр', async ({ page }) => {
+  await open(page, 'default')
+  await page.addStyleTag({ content: `
+    button { border: none; }
+    .gallery-viewer { --gallery-caption-color: rgb(250, 220, 100); }
+    .gallery-viewer__thumb { border-radius: 12px; }
+    .gallery-viewer__thumb[aria-pressed="true"] { border-color: rgb(30, 90, 160); }
+    .gallery-viewer__thumb-image { object-fit: contain; }
+  ` })
+
+  await expect(page.locator('.gallery-viewer__caption')).toHaveCSS('color', 'rgb(250, 220, 100)')
+  const button = thumb(page, 1)
+  await expect(button).toHaveCSS('border-top-left-radius', '12px')
+  await expect(button.locator('img')).toHaveCSS('object-fit', 'contain')
+  await button.click()
+  await expect(button).toHaveCSS('border-top-style', 'solid')
+  await expect(button).toHaveCSS('border-top-color', 'rgb(30, 90, 160)')
+})
+
 test('портрет и панорама, свободное поле, описание и Tab', async ({ page }) => {
   await open(page, 'default')
   const caption = page.locator('.gallery-viewer__caption')

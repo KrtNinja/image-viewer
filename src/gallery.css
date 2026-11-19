@@ -38,7 +38,7 @@
   overflow: auto;
   padding: .75rem 1rem;
   background: var(--gallery-caption, rgb(12 15 19 / .88));
-  color: white;
+  color: var(--gallery-caption-color, white);
   opacity: 0;
   pointer-events: none;
 }
@@ -70,7 +70,7 @@
   scrollbar-width: none;
 }
 .gallery-viewer__strip::-webkit-scrollbar { display: none; }
-.gallery-viewer__strip > button {
+.gallery-viewer__thumb {
   box-sizing: border-box;
   flex: 0 0 auto;
   inline-size: min(4.75rem, 100%);
@@ -82,10 +82,10 @@
   background: transparent;
   cursor: pointer;
 }
-.gallery-viewer__strip > button[aria-pressed="true"] {
+.gallery-viewer__thumb[aria-pressed="true"] {
   border-color: var(--gallery-accent, #3672bc);
 }
-.gallery-viewer__strip img {
+.gallery-viewer__thumb-image {
   display: block;
   inline-size: 100%;
   block-size: 100%;
