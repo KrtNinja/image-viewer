@@ -32,8 +32,24 @@ test('направление прокрутки учитывает оба кра
   expect(canScrollInDirection(bottom, 0)).toBe(false)
 })
 
+test('порог по умолчанию позволяет листать отдельными щелчками колеса', () => {
+  function countMoves(events: number, deltaPx: number, intervalMs: number) {
+    const wheel = new WheelPager()
+    let moves = 0
+    for (let i = 0; i < events; i++) {
+      if (wheel.move(deltaPx, i * intervalMs) === 'next') moves++
+    }
+    return moves
+  }
+
+  expect(countMoves(6, 100, 120)).toBe(6)
+  expect(countMoves(6, 72, 120)).toBe(6)
+  expect(countMoves(6, 100, 30)).toBe(1)
+  expect(countMoves(3, 10, 16)).toBe(0)
+})
+
 test('колесо накапливает 160 пикселей в одном направлении', () => {
-  const wheel = new WheelPager()
+  const wheel = new WheelPager({ thresholdPx: 160 })
   expect(wheel.move(80, 0)).toBeUndefined()
   expect(wheel.move(-80, 10)).toBeUndefined()
   expect(wheel.move(-79, 20)).toBeUndefined()
@@ -41,7 +57,7 @@ test('колесо накапливает 160 пикселей в одном н�
 })
 
 test('49 мс продлевают блокировку, через 50 мс накопление начинается с нуля', () => {
-  const wheel = new WheelPager()
+  const wheel = new WheelPager({ thresholdPx: 160 })
   expect(wheel.move(80, 0)).toBeUndefined()
   expect(wheel.move(80, 49)).toBe('next')
   expect(wheel.move(-160, 98)).toBeUndefined()
@@ -58,14 +74,14 @@ test('порог колеса и паузу можно задать для эк�
 })
 
 test('пауза сбрасывает и неполный порог', () => {
-  const wheel = new WheelPager()
+  const wheel = new WheelPager({ thresholdPx: 160 })
   expect(wheel.move(159, 0)).toBeUndefined()
   expect(wheel.move(1, 50)).toBeUndefined()
   expect(wheel.move(159, 51)).toBe('next')
 })
 
 test('инерционные события на краю списка учитываются до конца жеста', () => {
-  const wheel = new WheelPager()
+  const wheel = new WheelPager({ thresholdPx: 160 })
   expect(wheel.move(160, 0)).toBe('next')
   wheel.pass(5, 20)
   wheel.pass(5, 40)
@@ -74,7 +90,7 @@ test('инерционные события на краю списка учит�
 })
 
 test('нативная прокрутка подписи сбрасывает накопление и продлевает блокировку', () => {
-  const wheel = new WheelPager()
+  const wheel = new WheelPager({ thresholdPx: 160 })
   expect(wheel.move(80, 0)).toBeUndefined()
   wheel.pass(0, 10)
   expect(wheel.move(80, 20)).toBeUndefined()

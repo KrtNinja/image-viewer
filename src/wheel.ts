@@ -23,7 +23,7 @@ export class WheelPager {
   private distance = 0
   private locked = false
 
-  constructor({ thresholdPx = 160, pauseMs = 50 } = {}) {
+  constructor({ thresholdPx = 60, pauseMs = 50 } = {}) {
     this.thresholdPx = thresholdPx
     this.pauseMs = pauseMs
   }
