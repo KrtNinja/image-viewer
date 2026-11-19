@@ -1,0 +1,19 @@
+name: Инструменты unclebob
+description: crapper, dryer и mutator на закреплённых коммитах
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    - name: Установка crapper, dryer и mutator
+      shell: bash
+      env:
+        CRAPPER_SHA: c757ec79a6c15dc815238bbd9c2f4601eb54d3cc
+        DRYER_SHA: 66ff6d21a42c04afcad89c78a80066176d1294b0
+        MUTATOR_SHA: 29afb427129b6bf03699286966fc55ec8a4830d7
+      run: |
+        pip install --quiet --disable-pip-version-check \
+          "crapper @ git+https://github.com/unclebob/crapper@$CRAPPER_SHA" \
+          "dryer @ git+https://github.com/unclebob/dryer@$DRYER_SHA" \
+          "mutator @ git+https://github.com/unclebob/mutator@$MUTATOR_SHA"

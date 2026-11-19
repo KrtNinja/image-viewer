@@ -3,3 +3,6 @@ dist/
 storybook-static/
 test-results/
 playwright-report/
+coverage/
+.metrics/
+target/
