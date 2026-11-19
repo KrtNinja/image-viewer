@@ -41,12 +41,16 @@ export class GalleryService extends Observable {
     if (index >= 0) this.index = index
   }
 
+  canMove(direction: 'next' | 'prev') {
+    return direction === 'next' ? this.index + 1 < this.images.length : this.index > 0
+  }
+
   next() {
-    if (this.index + 1 < this.images.length) this.index++
+    if (this.canMove('next')) this.index++
   }
 
   prev() {
-    if (this.index > 0) this.index--
+    if (this.canMove('prev')) this.index--
   }
 
   toggleDescription() {
