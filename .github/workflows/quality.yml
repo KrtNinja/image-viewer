@@ -1,0 +1,54 @@
+name: quality
+on: pull_request
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  crap:
+    name: CRAP (crapper)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: ./.github/actions/unclebob
+      - run: npm run crap
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: crap-reports
+          include-hidden-files: true
+          path: |
+            .metrics/crap.edn
+            coverage/
+          if-no-files-found: warn
+
+  duplicates:
+    name: Повторы (dryer)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - uses: ./.github/actions/unclebob
+      - run: npm run dry
+
+  tools:
+    name: Тесты скрипта проверок
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm run test:tools
