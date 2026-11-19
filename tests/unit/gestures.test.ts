@@ -117,9 +117,9 @@ test('свайп требует 40 пикселей и преобладания 
   swipe.start(1, 50, 0)
   expect(swipe.end(1, 10, 40)).toBeUndefined()
   swipe.start(1, 50, 0)
-  expect(swipe.end(1, 10, 39)).toBe('next')
+  expect(swipe.end(1, 10, 39)).toBe('left')
   swipe.start(1, 50, 0)
-  expect(swipe.end(1, 90, -2)).toBe('prev')
+  expect(swipe.end(1, 90, -2)).toBe('right')
   expect(swipe.end(1, 90, -2)).toBeUndefined()
 })
 
@@ -130,7 +130,7 @@ test('пороги тапа и свайпа можно задать для эк�
   swipe.start(1, 0, 0)
   expect(swipe.end(1, 4, 0)).toBeUndefined()
   swipe.start(1, 0, 0)
-  expect(swipe.end(1, 12, 0)).toBe('prev')
+  expect(swipe.end(1, 12, 0)).toBe('right')
 })
 
 test('второй палец и отмена завершают жест только для нужного указателя', () => {

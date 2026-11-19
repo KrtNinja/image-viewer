@@ -17,14 +17,14 @@ export class SwipeGesture {
     if (stroke?.id === id && Math.hypot(x - stroke.x, y - stroke.y) > this.tapSlopPx) stroke.moved = true
   }
 
-  end(id: number, x: number, y: number): 'next' | 'prev' | 'tap' | undefined {
+  end(id: number, x: number, y: number): 'left' | 'right' | 'tap' | undefined {
     const stroke = this.stroke
     if (stroke?.id !== id) return
     this.stroke = undefined
     const dx = x - stroke.x
     const dy = y - stroke.y
     if (!stroke.moved && Math.hypot(dx, dy) <= this.tapSlopPx) return 'tap'
-    if (Math.abs(dx) >= this.swipeThresholdPx && Math.abs(dx) > Math.abs(dy)) return dx < 0 ? 'next' : 'prev'
+    if (Math.abs(dx) >= this.swipeThresholdPx && Math.abs(dx) > Math.abs(dy)) return dx < 0 ? 'left' : 'right'
   }
 
   cancel(id: number) {

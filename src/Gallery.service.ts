@@ -4,7 +4,7 @@ import type { ImageBase } from './ImageBase.js'
 export class GalleryService extends Observable {
   static shallow = new Set(['images'])
   // Read the current index and array directly, including between synchronous commands.
-  static ignore = new Set(['currentImage'])
+  static ignore = new Set(['currentImage', 'canNext', 'canPrev'])
   images: ImageBase[] = []
   index = -1
   descriptionOpen = false
@@ -41,16 +41,20 @@ export class GalleryService extends Observable {
     if (index >= 0) this.index = index
   }
 
-  canMove(direction: 'next' | 'prev') {
-    return direction === 'next' ? this.index + 1 < this.images.length : this.index > 0
+  get canNext() {
+    return this.index + 1 < this.images.length
+  }
+
+  get canPrev() {
+    return this.index > 0
   }
 
   next() {
-    if (this.canMove('next')) this.index++
+    if (this.canNext) this.index++
   }
 
   prev() {
-    if (this.canMove('prev')) this.index--
+    if (this.canPrev) this.index--
   }
 
   toggleDescription() {

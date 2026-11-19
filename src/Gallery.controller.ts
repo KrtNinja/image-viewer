@@ -1,6 +1,6 @@
 import {
   captionSelector, frameSelector, interactiveSelector, nonEmptyCaptionSelector,
-  ownFrame, ownTarget, ownWheelArea, thumbnailSelector,
+  ownFrame, ownTarget, ownWheelTarget, thumbnailSelector,
 } from './Gallery.dom.js'
 import type { GalleryService } from './Gallery.service.js'
 import { mount as mountStrip } from './Gallery.strip.js'
@@ -38,7 +38,7 @@ export class GalleryController {
   private arrow = (event: KeyboardEvent) => {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
     if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) return
-    if (!this.service.canMove('next') && !this.service.canMove('prev')) return
+    if (!this.service.canNext && !this.service.canPrev) return
     const node = ownTarget(event)
     const forward = event.key === 'ArrowRight'
     if (node?.matches(frameSelector)) this.service[forward ? 'next' : 'prev']()
@@ -53,7 +53,7 @@ export class GalleryController {
   }
 
   private onWheel(event: WheelEvent, pager: WheelPager) {
-    const node = ownWheelArea(event)
+    const node = ownWheelTarget(event)
     if (!node) return
     // Read the mode before the deltas so the browser keeps their original units.
     const { deltaMode, deltaY } = event
@@ -69,7 +69,8 @@ export class GalleryController {
       get line() { return parseFloat(getComputedStyle(root.querySelector(frameSelector)!).lineHeight) || 16 },
       get page() { return root.ownerDocument.documentElement.clientHeight },
     })
-    if (!pixels || !this.service.canMove(pixels > 0 ? 'next' : 'prev')) return pager.pass(pixels, event.timeStamp)
+    const hasNeighbor = pixels > 0 ? this.service.canNext : this.service.canPrev
+    if (!pixels || !hasNeighbor) return pager.pass(pixels, event.timeStamp)
     event.preventDefault()
     const action = pager.move(pixels, event.timeStamp)
     if (action) this.service[action]()
@@ -89,9 +90,9 @@ export class GalleryController {
   private pointerUp(event: PointerEvent, swipe: SwipeGesture) {
     const photo = ownFrame(event)
     if (!photo) return
-    const action = swipe.end(event.pointerId, event.clientX, event.clientY)
-    if (action === 'tap') {
-      if (photo.querySelector(nonEmptyCaptionSelector)) this.service.toggleDescription()
-    } else if (action) this.service[action]()
+    const gesture = swipe.end(event.pointerId, event.clientX, event.clientY)
+    if (gesture === 'left') this.service.next()
+    else if (gesture === 'right') this.service.prev()
+    else if (gesture === 'tap' && photo.querySelector(nonEmptyCaptionSelector)) this.service.toggleDescription()
   }
 }

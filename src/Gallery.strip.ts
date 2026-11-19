@@ -1,7 +1,9 @@
+import { ownStripSelector, selectedThumbnailSelector } from './Gallery.dom.js'
+
 export function mount(root: HTMLElement): () => void {
   function reveal() {
-    const row = root.querySelector<HTMLElement>(':scope > .gallery-viewer__strip')
-    const button = row?.querySelector<HTMLButtonElement>(':scope > button[aria-pressed="true"]')
+    const row = root.querySelector<HTMLElement>(ownStripSelector)
+    const button = row?.querySelector<HTMLButtonElement>(selectedThumbnailSelector)
     if (!row || !button) return
     const left = button.offsetLeft
     const right = left + button.offsetWidth
@@ -12,7 +14,7 @@ export function mount(root: HTMLElement): () => void {
   const resize = new ResizeObserver(reveal)
   resize.observe(root)
   const mutations = new MutationObserver(records => {
-    const row = root.querySelector(':scope > .gallery-viewer__strip')
+    const row = root.querySelector(ownStripSelector)
     if (row && records.some(({ target, type }) => target === root || target === row ||
       (type === 'attributes' && target.parentElement === row))) reveal()
   })
