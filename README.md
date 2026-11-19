@@ -1,6 +1,6 @@
 # GalleryViewer
 
-Встраиваемый компонент React для просмотра фотографий. Выбор кадра и описание по касанию принадлежат каждому экземпляру. Состояние хранит сервис на `kr-observable`, за подписку React отвечает [observer](https://observable.ru/integrations/React.html).
+Встраиваемый компонент React для просмотра фотографий. Выбор кадра и описание по касанию принадлежат каждому экземпляру. Состояние хранит сервис на `kr-observable`, галерея подписывается на его изменения через [listen](https://observable.ru/api/listen.html).
 
 ```tsx
 import { GalleryViewer, ImageBase } from 'image-viewer'

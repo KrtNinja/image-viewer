@@ -1,5 +1,5 @@
-import { useEffect, useRef, type ReactNode } from 'react'
-import { observer } from 'kr-observable/react'
+import { Component, useEffect, useRef, type ReactNode } from 'react'
+import { listen } from 'kr-observable'
 import { GalleryViewerController } from './GalleryViewerController.js'
 import { GalleryViewerService } from './GalleryViewerService.js'
 import type { ImageBase } from './ImageBase.js'
@@ -10,20 +10,34 @@ export type GalleryViewerProps = {
   children?: ReactNode
 }
 
-export function GalleryViewer({ images, startId, children }: GalleryViewerProps) {
-  const owner = useRef<GalleryViewerController | null>(null)
-  const existing = owner.current
-  if (!owner.current) {
-    owner.current = new GalleryViewerController(new GalleryViewerService())
-    owner.current.update(images, startId)
+export class GalleryViewer extends Component<GalleryViewerProps> {
+  private controller = new GalleryViewerController(new GalleryViewerService())
+  private unsubscribe?: () => void
+
+  constructor(props: GalleryViewerProps) {
+    super(props)
+    this.controller.update(props.images, props.startId)
   }
 
-  // On subsequent renders the parent may reuse the array after editing an ImageBase.
-  useEffect(() => existing?.update(images, startId))
-  return <GalleryView controller={owner.current}>{children}</GalleryView>
+  componentDidMount() {
+    this.unsubscribe = listen(this.controller.service, () => this.forceUpdate())
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe?.()
+  }
+
+  componentDidUpdate(previous: GalleryViewerProps) {
+    // A parent may reuse the same array after editing an ImageBase.
+    if (previous !== this.props) this.controller.update(this.props.images, this.props.startId)
+  }
+
+  render() {
+    return <GalleryView controller={this.controller}>{this.props.children}</GalleryView>
+  }
 }
 
-const GalleryView = observer(function GalleryView({ controller, children }: {
+function GalleryView({ controller, children }: {
   controller: GalleryViewerController
   children?: ReactNode
 }) {
@@ -84,4 +98,4 @@ const GalleryView = observer(function GalleryView({ controller, children }: {
       )}
     </div>
   )
-})
+}
