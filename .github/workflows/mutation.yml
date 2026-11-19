@@ -2,7 +2,7 @@ name: mutation
 
 # Только ручной запуск владельцем. В PR и по расписанию не запускается.
 on:
-  workflow_dispatch:
+  push:
 
 permissions:
   contents: read
