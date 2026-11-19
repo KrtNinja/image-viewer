@@ -206,13 +206,8 @@ test('диалог, положение страницы и диалога, Escap
 test.describe('сенсорный ввод', () => {
   test.use({ hasTouch: true })
 
-  test.beforeEach(async ({ page, browserName }) => {
+  test.beforeEach(async ({ page }) => {
     const hoverNone = await page.evaluate(() => matchMedia('(hover: none)').matches)
-    if (!hoverNone && browserName !== 'chromium') {
-      const reason = `${browserName}: при hasTouch: true основное устройство не соответствует (hover: none)`
-      console.info(reason)
-      test.skip(true, reason)
-    }
     expect(hoverNone).toBe(true)
   })
 
