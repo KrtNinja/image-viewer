@@ -2,9 +2,11 @@ import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests',
+  testIgnore: '**/unit/**',
   workers: 2,
   use: { baseURL: 'http://127.0.0.1:6007', viewport: { width: 1000, height: 800 } },
   projects: [
+    { name: 'unit', testDir: './tests/unit', testIgnore: [] },
     { name: 'Chromium', use: { browserName: 'chromium' } },
     { name: 'Firefox', use: { browserName: 'firefox' } },
     { name: 'WebKit', use: { browserName: 'webkit' } },

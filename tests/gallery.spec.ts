@@ -57,7 +57,7 @@ test('пустой список, первое заполнение, повтор
   await expect(page.locator('.gallery-viewer__caption')).toHaveCount(0)
 })
 
-// Exact timestamps avoid introducing test-runner latency into the 49/50 ms boundary.
+// Model continuous or separate wheel gestures independently of browser automation latency.
 async function wheel(target: Locator, deltaY: number, time: number, options: Pick<WheelEventInit, 'ctrlKey' | 'deltaX' | 'deltaMode'> = {}) {
   return target.evaluate((node, args) => {
     const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: args.deltaY, ...args.options })
@@ -67,30 +67,15 @@ async function wheel(target: Locator, deltaY: number, time: number, options: Pic
   }, { deltaY, time, options })
 }
 
-test('колесо делит накопление между областями и учитывает хвост на границе', async ({ page }) => {
+test('колесо делит накопление между кадром и лентой и учитывает единицы события', async ({ page }) => {
   await open(page, 'updates')
   await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
-  expect(await wheel(photo(page), 160, 0)).toBe(true)
-  expect(await wheel(strip(page), 5, 20)).toBe(false)
-  expect(await wheel(photo(page), 5, 40)).toBe(false)
-  expect(await wheel(strip(page), -160, 60)).toBe(true)
-  await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
-  await wheel(photo(page), -160, 109)
-  await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
-  await wheel(photo(page), -80, 159)
-  await expect(thumb(page, 3)).toHaveAttribute('aria-pressed', 'true')
-  await wheel(strip(page), -80, 179)
-  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
-
-  await wheel(strip(page), 120, 300)
-  await wheel(photo(page), -80, 320)
-  await expect(thumb(page, 2)).toHaveAttribute('aria-pressed', 'true')
-  await wheel(photo(page), -80, 340)
+  expect(await wheel(photo(page), -80, 100)).toBe(true)
+  expect(await wheel(strip(page), -80, 110)).toBe(true)
   await expect(thumb(page, 1)).toHaveAttribute('aria-pressed', 'true')
-  expect(await wheel(photo(page), -10, 360)).toBe(false)
-  expect(await wheel(photo(page), 200, 500, { ctrlKey: true })).toBe(false)
-  expect(await wheel(strip(page), 1, 510, { deltaX: 80 })).toBe(false)
-  await expect(thumb(page, 1)).toHaveAttribute('aria-pressed', 'true')
+  expect(await wheel(photo(page), -10, 120)).toBe(false)
+  expect(await wheel(photo(page), 200, 200, { ctrlKey: true })).toBe(false)
+  expect(await wheel(strip(page), 1, 210, { deltaX: 80 })).toBe(false)
 
   const line = await photo(page).evaluate(node => parseFloat(getComputedStyle(node).lineHeight))
   await wheel(strip(page), Math.ceil(160 / line), 600, { deltaMode: 1 })
@@ -350,4 +335,22 @@ test('стрелки действуют только в активной гал�
   await input.press('ArrowLeft')
   expect(await input.evaluate(node => (node as HTMLInputElement).selectionStart)).toBe(2)
   await expect(first.locator('[aria-pressed=true]')).toHaveAccessibleName('Фото 2')
+})
+
+test('клик, стрелки и колесо во вложенной галерее сохраняют выбор внешней', async ({ page }) => {
+  await open(page, 'independent')
+  await page.locator('.gallery-viewer').evaluateAll(([outer, inner]) => {
+    outer.querySelector('.gallery-viewer__caption')!.append(inner)
+  })
+  const outer = page.locator('.example-pair > :first-child > .gallery-viewer')
+  const inner = outer.locator('.gallery-viewer')
+  const selection = (gallery: Locator) => gallery.locator(':scope > .gallery-viewer__strip [aria-pressed=true]')
+  const button = inner.getByRole('button', { name: 'Фото 2', exact: true })
+  await button.press('Enter')
+  await expect(selection(inner)).toHaveAccessibleName('Фото 2')
+  await button.press('ArrowRight')
+  await expect(selection(inner)).toHaveAccessibleName('Фото 3')
+  expect(await wheel(inner.locator('.gallery-viewer__photo'), 160, 100)).toBe(true)
+  await expect(selection(inner)).toHaveAccessibleName('Фото 4')
+  await expect(selection(outer)).toHaveAccessibleName('Фото 1')
 })

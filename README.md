@@ -41,6 +41,8 @@ npm run storybook
 
 ## Сборка и проверки
 
+Только распознавание колеса, свайпов и тапов можно проверить командой `npx playwright test -c tests/unit`. Эти тесты передают в классы числа и выполняются в Node.js без браузера и Storybook. Полный набор запускает `npm test`.
+
 ```sh
 npm run check
 npm run build
