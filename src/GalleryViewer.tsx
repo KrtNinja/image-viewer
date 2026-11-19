@@ -12,12 +12,15 @@ export type GalleryViewerProps = {
 
 export function GalleryViewer({ images, startId, children }: GalleryViewerProps) {
   const owner = useRef<GalleryViewerController | null>(null)
-  if (!owner.current) owner.current = new GalleryViewerController(new GalleryViewerService())
-  const controller = owner.current
+  const existing = owner.current
+  if (!owner.current) {
+    owner.current = new GalleryViewerController(new GalleryViewerService())
+    owner.current.update(images, startId)
+  }
 
-  // A parent may edit an ImageBase instance and render again with the same array.
-  useEffect(() => controller.update(images, startId))
-  return <GalleryView controller={controller}>{children}</GalleryView>
+  // On subsequent renders the parent may reuse the array after editing an ImageBase.
+  useEffect(() => existing?.update(images, startId))
+  return <GalleryView controller={owner.current}>{children}</GalleryView>
 }
 
 const GalleryView = observer(function GalleryView({ controller, children }: {
@@ -57,10 +60,10 @@ const GalleryView = observer(function GalleryView({ controller, children }: {
   return (
     <div className="gallery-viewer">
       <div className="gallery-viewer__stage">
-        <div className="gallery-viewer__frame" ref={frame} tabIndex={hasDescription ? 0 : undefined}
+        <div className="gallery-viewer__frame" ref={frame} tabIndex={0}
           data-touch={service.touchInput || undefined}>
           <img className="gallery-viewer__photo" src={image.src} draggable={false}
-            alt={`Фото ${service.index + 1} из ${service.images.length}`} />
+            alt={image.alt ?? `Фото ${service.index + 1} из ${service.images.length}`} />
           {hasDescription && (
             <div className="gallery-viewer__caption" data-open={service.descriptionOpen || undefined}>
               {children}
@@ -71,8 +74,8 @@ const GalleryView = observer(function GalleryView({ controller, children }: {
       {hasStrip && (
         <div className="gallery-viewer__strip" ref={strip} role="group" aria-label="Миниатюры">
           {service.images.map((item, index) => (
-            <button type="button" key={item.id} ref={index === service.index ? selected : undefined}
-              aria-label={`Фото ${index + 1}`} aria-pressed={index === service.index}
+            <button type="button" key={item.id} value={item.id} ref={index === service.index ? selected : undefined}
+              aria-label={`Фото ${index + 1}`} aria-description={item.alt} aria-pressed={index === service.index}
               onClick={() => service.select(item.id)}>
               <img src={item.previewSrc} alt="" draggable={false} />
             </button>

@@ -75,6 +75,26 @@ export class GalleryViewerController {
       else service.prev()
     }
 
+    function arrow(event: KeyboardEvent) {
+      const forward = event.key === 'ArrowRight'
+      if (!forward && event.key !== 'ArrowLeft') return
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing) return
+
+      const target = event.target
+      if (target === frame) {
+        if (forward) service.next()
+        else service.prev()
+      } else {
+        if (!(target instanceof HTMLButtonElement) || target.parentElement !== strip) return
+        const next = forward ? target.nextElementSibling : target.previousElementSibling
+        if (next instanceof HTMLButtonElement) {
+          service.select(next.value)
+          next.focus({ preventScroll: true })
+        }
+      }
+      event.preventDefault()
+    }
+
     function cancel() {
       stroke = undefined
     }
@@ -120,7 +140,11 @@ export class GalleryViewerController {
     frame.addEventListener('pointercancel', cancelPointer, { signal })
     frame.addEventListener('lostpointercapture', cancelPointer, { signal })
     frame.addEventListener('wheel', wheel, { passive: false, signal })
-    strip?.addEventListener('wheel', wheel, { passive: false, signal })
+    if (strip) {
+      frame.addEventListener('keydown', arrow, { signal })
+      strip.addEventListener('keydown', arrow, { signal })
+      strip.addEventListener('wheel', wheel, { passive: false, signal })
+    }
     return () => listeners.abort()
   }
 }
