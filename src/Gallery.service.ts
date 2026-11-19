@@ -3,6 +3,8 @@ import type { ImageBase } from './ImageBase.js'
 
 export class GalleryService extends Observable {
   static shallow = new Set(['images'])
+  // Read the current index and array directly, including between synchronous commands.
+  static ignore = new Set(['currentImage'])
   images: ImageBase[] = []
   index = -1
   descriptionOpen = false
