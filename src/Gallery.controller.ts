@@ -52,9 +52,9 @@ export class GalleryController {
     root.addEventListener('click', this.click, { signal })
     root.addEventListener('keydown', this.arrow, { signal })
     root.addEventListener('wheel', event => this.wheel(event, wheel), { passive: false, signal })
-    for (const type of ['pointerdown', 'pointermove', 'pointerup'] as const) {
-      root.addEventListener(type, event => this.pointer(event, swipe), { signal })
-    }
+    root.addEventListener('pointerdown', event => this.pointerDown(event, swipe), { signal })
+    root.addEventListener('pointermove', event => this.pointerMove(event, swipe), { signal })
+    root.addEventListener('pointerup', event => this.pointerUp(event, swipe), { signal })
     for (const type of ['pointercancel', 'lostpointercapture'] as const) {
       root.addEventListener(type, event => swipe.cancel(event.pointerId), { signal })
     }
@@ -95,24 +95,25 @@ export class GalleryController {
     if (action) this.service[action]()
   }
 
-  private pointer(event: PointerEvent, swipe: GallerySwipe) {
+  private pointerDown(event: PointerEvent, swipe: GallerySwipe) {
+    const photo = frame(event)
+    if (!photo || !event.isPrimary || event.button !== 0 || (event.target as Element).closest(interactiveSelector)) return
+    swipe.start(event.pointerId, event.clientX, event.clientY)
+    photo.setPointerCapture(event.pointerId)
+  }
+
+  private pointerMove(event: PointerEvent, swipe: GallerySwipe) {
+    if (frame(event)) swipe.move(event.pointerId, event.clientX, event.clientY)
+  }
+
+  private pointerUp(event: PointerEvent, swipe: GallerySwipe) {
     const photo = frame(event)
     if (!photo) return
-    const { pointerId, clientX, clientY, pointerType } = event
-    const touch = pointerType !== 'mouse'
-    if (event.type === 'pointerdown') {
-      this.service.setTouchInput(touch)
-      if (!event.isPrimary || event.button !== 0 || (event.target as Element).closest(interactiveSelector)) return
-      swipe.start(pointerId, clientX, clientY)
-      photo.setPointerCapture(pointerId)
-    } else if (event.type === 'pointermove') {
-      if (!touch && this.service.touchInput) this.service.setTouchInput(false)
-      swipe.move(pointerId, clientX, clientY)
-    } else {
-      const action = swipe.end(pointerId, clientX, clientY)
-      if (action === 'tap') {
-        if (touch && photo.querySelector(':scope > .gallery-viewer__caption:not(:empty)')) this.service.toggleDescription()
-      } else if (action) this.service[action]()
-    }
+    const action = swipe.end(event.pointerId, event.clientX, event.clientY)
+    if (action === 'tap') {
+      if (event.pointerType !== 'mouse' && photo.querySelector(':scope > .gallery-viewer__caption:not(:empty)')) {
+        this.service.toggleDescription()
+      }
+    } else if (action) this.service[action]()
   }
 }

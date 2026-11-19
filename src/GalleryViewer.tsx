@@ -25,8 +25,7 @@ export const GalleryViewer = observer(function GalleryViewer({ images, startId, 
     <div className="gallery-viewer" ref={root} hidden={!image}>
       {image && (
         <div className="gallery-viewer__stage">
-          <div className="gallery-viewer__frame" tabIndex={0}
-            data-touch={service.touchInput || undefined}>
+          <div className="gallery-viewer__frame" tabIndex={0}>
             <img className="gallery-viewer__photo" src={image.src} draggable={false}
               alt={image.alt ?? `Фото ${service.index + 1} из ${service.images.length}`} />
             {hasDescription && (

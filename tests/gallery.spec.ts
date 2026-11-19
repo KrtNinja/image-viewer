@@ -206,6 +206,16 @@ test('диалог, положение страницы и диалога, Escap
 test.describe('сенсорный ввод', () => {
   test.use({ hasTouch: true })
 
+  test.beforeEach(async ({ page, browserName }) => {
+    const hoverNone = await page.evaluate(() => matchMedia('(hover: none)').matches)
+    if (!hoverNone && browserName !== 'chromium') {
+      const reason = `${browserName}: при hasTouch: true основное устройство не соответствует (hover: none)`
+      console.info(reason)
+      test.skip(true, reason)
+    }
+    expect(hoverNone).toBe(true)
+  })
+
   test('два тапа в одной точке, кнопка и независимость двух галерей', async ({ page }) => {
     await open(page, 'independent')
     const galleries = page.locator('.gallery-viewer')
@@ -223,11 +233,6 @@ test.describe('сенсорный ввод', () => {
     await expect(second.locator('.gallery-viewer__caption')).toHaveCSS('opacity', '0')
     await expect(second.locator('[aria-pressed=true]')).toHaveAccessibleName('Фото 1')
     await tap()
-    await expect(caption).toHaveCSS('opacity', '0')
-    await tap()
-    await image.hover({ position: { x: 8, y: 8 } })
-    await expect(first.locator('.gallery-viewer__frame')).not.toHaveAttribute('data-touch', 'true')
-    await page.mouse.move(1, 1)
     await expect(caption).toHaveCSS('opacity', '0')
     await tap()
     await expect(caption).toHaveCSS('opacity', '1')

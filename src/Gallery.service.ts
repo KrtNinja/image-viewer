@@ -8,7 +8,6 @@ export class GalleryService extends Observable {
   images: ImageBase[] = []
   index = -1
   descriptionOpen = false
-  touchInput = false
 
   private ids: string[] = []
   private lastStartId?: string
@@ -35,11 +34,6 @@ export class GalleryService extends Observable {
       if (startId !== undefined && startId !== this.lastStartId) this.select(startId)
       this.lastStartId = startId
     }
-  }
-
-  setTouchInput(touch: boolean) {
-    if (touch && !this.touchInput) this.descriptionOpen = false
-    this.touchInput = touch
   }
 
   select(id: string) {
