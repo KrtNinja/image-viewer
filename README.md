@@ -2,6 +2,8 @@
 
 Встраиваемый компонент React для просмотра фотографий. Выбор кадра и описание по касанию принадлежат каждому экземпляру. Состояние хранит сервис на `kr-observable`, за изменениями в React следит `observer` из `kr-observable/react`.
 
+[Открыть Storybook](https://krtninja.github.io/image-viewer/) · [Посмотреть только галерею](https://krtninja.github.io/image-viewer/iframe.html?id=galleryviewer--default&viewMode=story)
+
 ```tsx
 import { GalleryViewer, ImageBase } from 'image-viewer'
 import 'image-viewer/gallery.css'
